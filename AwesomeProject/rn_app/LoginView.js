@@ -32,7 +32,7 @@ export default class LoginView extends Component<{}> {
       } else {
         AccessToken.getCurrentAccessToken().then((data) => {
                     console.log(data.accessToken.toString());
-                    console.log(data.toString());
+                    console.log(data.userID.toString());
                 });
         alert('Login success with permissions: '
           +result.grantedPermissions.toString());
