@@ -13,7 +13,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 
-import FBSD,{ LoginManager,AccessToken } from 'react-native-fbsdk'
+import FBSD,{ LoginManager,AccessToken,GraphRequestManager,GraphRequest } from 'react-native-fbsdk'
 
 
 const instructions = Platform.select({
@@ -30,10 +30,38 @@ export default class LoginView extends Component<{}> {
       if (result.isCancelled) {
         alert('Login cancelled');
       } else {
-        AccessToken.getCurrentAccessToken().then((data) => {
-                    console.log(data.accessToken.toString());
-                    console.log(data.userID.toString());
-                });
+        AccessToken.getCurrentAccessToken().then(
+          (data) => {
+            let accessToken = data.accessToken;
+            alert(accessToken.toString());
+
+            const responseInfoCallback = (error, result) => {
+              if (error) {
+                console.log(error)
+                alert('Error fetching data: ' + error.toString());
+              } else {
+                console.log(result)
+                alert('id: ' + result.id + '\n\nname: ' + result.name + '\n\nfirst_name: ' + result.first_name + '\n\nlast_name: ' + result.last_name + '\n\nemail: ' + result.email);
+              }
+            }
+
+            const infoRequest = new GraphRequest(
+              '/me',
+              {
+                accessToken: accessToken,
+                parameters: {
+                  fields: {
+                    string: 'email,cover,name,first_name,last_name,age_range,link,gender,locale,picture,timezone,updated_time,verified'
+                  }
+                }
+              },
+              responseInfoCallback
+            );
+
+            // Start the graph request.
+            new GraphRequestManager().addRequest(infoRequest).start();
+
+          });
         alert('Login success with permissions: '
           +result.grantedPermissions.toString());
       }
